@@ -1,0 +1,17 @@
+{
+  "name": "riscos-sprite",
+  "version": "1.0.0",
+  "description": "Library for loading RISC OS Sprite files",
+  "main": "src/sprite.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/RichardBrown384/riscos-sprite-js.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/RichardBrown384/riscos-sprite-js/issues"
+  },
+  "homepage": "https://github.com/RichardBrown384/riscos-sprite-js#readme"
+}
