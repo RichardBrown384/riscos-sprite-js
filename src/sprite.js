@@ -488,7 +488,7 @@ class SpriteFile {
         }
     }
 
-    load() {
+    readSpriteArea() {
         const controlBlock = this.readControlBlock();
         const {
             spriteCount,
@@ -510,9 +510,15 @@ class SpriteFile {
 }
 
 module.exports = {
+    SpriteArea: {
+        fromUint8Array: function (array) {
+            return new SpriteFile(array.buffer).readSpriteArea();
+        }
+    },
     Sprite: {
-        load: function (buffer) {
-            return new SpriteFile(buffer).load();
+        fromUint8Array: function (array) {
+            return new SpriteFile(array.buffer).readSprite();
         }
     }
+
 };
