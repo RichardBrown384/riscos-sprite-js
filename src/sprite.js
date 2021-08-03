@@ -1,14 +1,17 @@
 const SPRITE_PALETTE_OFFSET = 44;
 
-const SPRITE_MODE_BITS_PER_PIXEL = {
-    12: 4,
-    13: 8,
-    15: 8,
-    18: 1,
-    20: 4,
-    21: 8,
-    27: 4,
-    28: 8
+const DPI_45 = 45;
+const DPI_90 = 90;
+
+const SPRITE_MODE_PROPERTIES_MAP = {
+    12: {bitsPerPixel: 4, xDpi: DPI_90, yDpi: DPI_45},
+    13: {bitsPerPixel: 8, xDpi: DPI_45, yDpi: DPI_45},
+    15: {bitsPerPixel: 8},
+    18: {bitsPerPixel: 1},
+    20: {bitsPerPixel: 4},
+    21: {bitsPerPixel: 8},
+    27: {bitsPerPixel: 4, xDpi: DPI_90, yDpi: DPI_90},
+    28: {bitsPerPixel: 8},
 };
 
 const SPRITE_PALETTE_4BPP = [
@@ -443,9 +446,10 @@ class SpriteFile {
             mode
         } = controlBlock;
 
-        const bitsPerPixel = SPRITE_MODE_BITS_PER_PIXEL[mode];
-        this.check(bitsPerPixel !== undefined, 'unsupported sprite screen mode', {mode})
+        const modeProperties = SPRITE_MODE_PROPERTIES_MAP[mode];
+        this.check(modeProperties, 'unsupported sprite screen mode', {mode})
 
+        const {bitsPerPixel} = modeProperties;
         const bitsPerLine = 32 * wordWidth + 1 + lastBitUsed - firstBitUsed;
         const pixelWidth = bitsPerLine / bitsPerPixel;
         const pixelHeight = lineHeight + 1;
@@ -471,7 +475,7 @@ class SpriteFile {
 
         return {
             controlBlock,
-            bitsPerPixel,
+            ...modeProperties,
             pixelWidth,
             pixelHeight,
             image,
