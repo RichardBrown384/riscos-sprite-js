@@ -5,7 +5,7 @@ Javascript library for reading RISC OS [Sprite][sprite-documentation] files.
 ## Installation
 
 ```bash
-npm install git@github.com:RichardBrown384/riscos-sprite-js.git
+npm install git+https://github.com/RichardBrown384/riscos-sprite-js.git
 ```
 
 ## Project status
