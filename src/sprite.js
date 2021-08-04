@@ -483,7 +483,7 @@ class SpriteFile {
             image,
             ...(mask && {mask}),
             ...(palette && {palette}),
-            ...(wimpPalette && wimpPalette)
+            ...(wimpPalette && {wimpPalette})
         }
     }
 
