@@ -14,7 +14,7 @@ const SPRITE_MODE_PROPERTIES_MAP = {
     28: {bitsPerPixel: 8},
 };
 
-const SPRITE_PALETTE_4BPP = [
+const WIMP_PALETTE_4BPP = [
     {first: 0xFFFFFF00, second: 0xFFFFFF00},
     {first: 0xDDDDDD00, second: 0xDDDDDD00},
     {first: 0xBBBBBB00, second: 0xBBBBBB00},
@@ -33,7 +33,7 @@ const SPRITE_PALETTE_4BPP = [
     {first: 0xFFBB0000, second: 0xFFBB0000},
 ];
 
-const SPRITE_PALETTE_8BPP = [
+const WIMP_PALETTE_8BPP = [
     {first: 0x00000000, second: 0x00000000},
     {first: 0x11111100, second: 0x11111100},
     {first: 0x22222200, second: 0x22222200},
@@ -292,9 +292,9 @@ const SPRITE_PALETTE_8BPP = [
     {first: 0xFFFFFF00, second: 0xFFFFFF00}
 ];
 
-const SPRITE_BITS_PER_PIXEL_PALETTE = {
-    4: SPRITE_PALETTE_4BPP,
-    8: SPRITE_PALETTE_8BPP
+const SPRITE_BITS_PER_PIXEL_PALETTE_MAP = {
+    4: WIMP_PALETTE_4BPP,
+    8: WIMP_PALETTE_8BPP
 };
 
 class SpriteError extends Error {
@@ -416,20 +416,20 @@ class SpriteFile {
         return image;
     }
 
-    readSpritePaletteArea({imageOffset}, bitsPerPixel) {
+    readSpritePaletteArea({imageOffset}) {
         this.checkAlignment('misaligned sprite palette')
         const count = (imageOffset - SPRITE_PALETTE_OFFSET) / 8;
-        if (count === 0) {
-            return SPRITE_BITS_PER_PIXEL_PALETTE[bitsPerPixel];
+        if (count !== 0) {
+            const palette = [];
+            for (let n = 0; n < count; n++) {
+                palette.push({
+                    first: this.readUint(),
+                    second: this.readUint()
+                });
+            }
+            return palette;
         }
-        const palette = [];
-        for (let n = 0; n < count; n++) {
-            palette.push({
-                first: this.readUint(),
-                second: this.readUint()
-            });
-        }
-        return palette;
+        return null;
     }
 
     readSprite() {
@@ -461,13 +461,15 @@ class SpriteFile {
         this.check(pixelHeight > 0, 'zero or negative sprite height');
 
         this.setPosition(spritePosition + SPRITE_PALETTE_OFFSET);
-        const palette = this.readSpritePaletteArea(controlBlock, bitsPerPixel);
-        this.check(palette, 'no palette defined', {bitsPerPixel});
+        const palette = this.readSpritePaletteArea(controlBlock);
+        const wimpPalette = SPRITE_BITS_PER_PIXEL_PALETTE_MAP[bitsPerPixel];
+        this.check(bitsPerPixel > 8 || palette || wimpPalette,
+            'palette undefined for indexed screen mode', {mode});
 
         this.setPosition(spritePosition + imageOffset);
         const image = this.readSpriteImage(controlBlock, bitsPerPixel, pixelWidth, pixelHeight);
 
-        let mask = undefined;
+        let mask;
         if (maskOffset !== imageOffset) {
             this.setPosition(spritePosition + maskOffset);
             mask = this.readSpriteImage(controlBlock, bitsPerPixel, pixelWidth, pixelHeight);
@@ -480,7 +482,8 @@ class SpriteFile {
             pixelHeight,
             image,
             ...(mask && {mask}),
-            palette
+            ...(palette && {palette}),
+            ...(wimpPalette && wimpPalette)
         }
     }
 
